@@ -1,60 +1,386 @@
-<p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
+## Back End (Laravel)
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+### Crear proyecto Laravel
+```sh
+VBox_da@VBox_da-PC MINGW32 /c/xampp/htdocs
 
-## About Laravel
+composer create-project --prefer-dist laravel/laravel larticles
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as:
+cd larticles
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+VBox_da@VBox_da-PC MINGW32 /c/xampp/htdocs/larticles
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications.
+```
 
-## Learning Laravel
+### Verificar en navegador
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of any modern web application framework, making it a breeze to get started learning the framework.
+http://localhost/larticles/public/
 
-If you're not in the mood to read, [Laracasts](https://laracasts.com) contains over 1100 video tutorials on a range of topics including Laravel, modern PHP, unit testing, JavaScript, and more. Boost the skill level of yourself and your entire team by digging into our comprehensive video library.
+### Crear Virtualhost
+c/xampp/apache/conf/extra/httpd-vhosts.conf
 
-## Laravel Sponsors
+```conf
+<VirtualHost *:80>
+    DocumentRoot "C:/xampp/htdocs/larticles/public"
+    ServerName larticles.test
+</VirtualHost>
+```
 
-We would like to extend our thanks to the following sponsors for helping fund on-going Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell):
+### Editar archivo con bloc de notas (abrir como administrador)
+C:\Windows\System32\drivers\etc\hosts
+```conf
+127.0.0.1   larticles.test
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
+Reiniciar Apache
 
-## Contributing
+### Verificar en navegador
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+http://larticles.test
 
-## Security Vulnerabilities
+### Crear Base de Datos (larticles) en PostgreSQL
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-## License
+### Configurar archivo .env
+```conf
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=larticles
+DB_USERNAME=postgres
+DB_PASSWORD=123456
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Crear migraciones
+```sh
+VBox_da@VBox_da-PC MINGW32 /c/xampp/htdocs/larticles
+
+php artisan make:migration create_articles_table --create=articles
+
+> Las opciones --table y --create puden ser usadas para indicar el nombre de la tabla y si la migracion creará o no una nueva tabla.
+
+> ejemplo para hacer cambios a una tabla 
+>php artisan make:migration add_votes_to_users_table --table=users
+```
+
+#### Agregar campos a la tabla
+En database/migrations/XXXX_XX_XX_XXXXXX_create_articles_table.php
+```php
+    ...
+    public function up()
+    {
+        Schema::create('articles', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('title');
+            $table->text('body');
+            $table->timestamps();
+        });
+    }
+    ...
+```
+
+### Agregar valores aleatorios, (definir una longitud por defecto)
+En app/Providers/AppServiceProvider.php
+```php
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
+
+class AppServiceProvider extends ServiceProvider
+{
+
+    public function boot()
+    {
+        Schema::defaultStringLength(191);
+    }
+```
+
+### Generar valores semilla (seed) aleatorios
+```sh
+php artisan make:seeder ArticlesTableSeeder
+```
+
+En database/seeds/ArticlesTableSeeder.php, crear 30 registros aleatorios de la clase Articles.
+```php
+    ...
+    public function run()
+    {
+        factory(App\Article::class, 30)->create();
+    }
+    ...
+```
+
+En database/seeds/DatabaseSeeder.php, llamar a ArticlesTableSeeder
+```php
+    ...
+    public function run()
+    {
+        $this->call(ArticlesTableSeeder::class);
+    }
+    ...
+```
+
+### Crear el molde de los valores para poder fabricar
+```sh
+php artisan make:factory ArticleFactory
+```
+
+En database/factories/ArticleFactory.php, llamar a ArticlesTableSeeder
+```php
+    ...
+$factory->define(App\Article::class, function (Faker $faker) {
+    return [
+        'title' => $faker->text(50),
+        'body'  => $faker->text(200)
+    ];
+});
+```
+
+### Crear el modelo ORM
+```sh
+php artisan make:model Article
+```
+
+### Ejecutar la migracion de las tablas a la base de datos, con --seed ejecuta las semillas todo de una vez
+```sh
+php artisan migrate
+```
+### Ejecutar las semillas
+```sh
+php artisan db:seed
+```
+
+### Crear el Controlador como un resource (permite hacer un CRUD rapidamente)
+```sh
+php artisan make:controller ArticleController --resource
+```
+
+### Crear rutas en routes/api.php
+```php
+// List articles
+Route::get('articles', 'ArticleController@index');
+// List single article
+Route::get('article/{id}', 'ArticleController@show');
+// Create new article
+Route::post('article', 'ArticleController@store');
+// Update article
+Route::put('article', 'ArticleController@store');
+// Delete article
+Route::delete('article/{id}', 'ArticleController@destroy');
+```
+
+### Crear Resource, como se va a generar la respuesta
+```sh
+php artisan make:resource Article
+```
+
+En app/Http/Resources/Article.php
+```php
+    ...
+    public function toArray($request)
+    {
+        //return parent::toArray($request);
+        
+        //para no mostrar todos los datos en la respuesta y solo limitar a algunos
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'body' => $this->body
+        ];
+    }
+
+    //para agregar mas datos en la respuesta
+    //medium es una api para laravel para crear json api
+    public function with($request) {
+        return [
+            'version' => '1.0.0',
+            'author_url' => url('http://traversymedia.com')
+        ];
+    }
+```
+
+### Declarar el controlador
+En app/Http/Controllers/ArticleController.php, borrar 
+create(), muestra el formulario para crear un recurso
+edit(), muestra el formulario para editar un recurso
+update(), actualiza el recurso en la base de datos, se va a hacer todo desde store()
+```php
+use Illuminate\Http\Request;
+use App\Http\Requests;
+use App\Article;
+use App\Http\Resources\Article as ArticleResource;
+
+    ...
+    //mostrar todos los valores con paginacion
+    public function index()
+    {
+        // Get articles y paginar de a 5 resultados los mas recientes
+        $articles = Article::orderBy('created_at', 'desc')->paginate(5);
+        // Return collection of articles as a resource
+        return ArticleResource::collection($articles);
+    }
+
+    //guardar nuevo o editar segun el metodo post o put
+    public function store(Request $request)
+    {
+        $article = $request->isMethod('put') ? Article::findOrFail($request->article_id) : new Article;
+        $article->id = $request->input('article_id');
+        $article->title = $request->input('title');
+        $article->body = $request->input('body');
+        if($article->save()) {
+            return new ArticleResource($article);
+        }
+    }
+
+    //devolver un articulo segun id
+    public function show($id)
+    {
+        // Get article
+        $article = Article::findOrFail($id);
+        // Return single article as a resource
+        return new ArticleResource($article);
+    }
+
+    //para eliminar un articulo segun por id
+    public function destroy($id)
+    {
+        // Get article
+        $article = Article::findOrFail($id);
+        if($article->delete()) {
+            return new ArticleResource($article);
+        }    
+    }
+```
+
+Con **`postman`** se puede verificar las llamadas http
+[https://www.getpostman.com/apps](https://www.getpostman.com/apps)
+
+get->index
+http://larticles.test/api/articles
+
+delete->destroy
+http://larticles.test/api/article/1
+
+post->store
+header content-type application/json
+body {
+    "tile": "test title",
+    "body": "test body"
+}
+http://larticles.test/api/article
+
+put->store
+header content-type application/json
+body {
+    "article_id": "1"
+    "tile": "test title",
+    "body": "test body"
+}
+
+get->show
+http://larticles.test/api/article/1
+
+Para que el resultado muestre solo un objeto con los valores {id: ...}, y no un objeto data con los valores { data: {id: ...} }
+
+En app/Providers/AppServiceProvider.php
+```php
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
+// use Illuminate\Http\Resources\Json\Resource;
+
+class AppServiceProvider extends ServiceProvider
+{
+
+    public function boot()
+    {
+        Schema::defaultStringLength(191);
+        // Resource::withoutWrapping();
+    }
+```
+
+## Front End (Node.js y Vue.js)
+
+En el archivo **`package.json`** se ven las dependencias que vienen preconfiguradas.
+
+Para instalarlas
+```sh
+npm install
+```
+
+Para observar cambios en los archivos y que se transpilen en css y js tendrá a laravel-mix observando y build nuestros archivos todo el tiempo:
+```sh
+npm run watch
+```
+
+### Componente Vue.js
+En resources/assets/js/app.js, está la vista principal que inicializa vue
+```js
+Vue.component('navbar', require('./components/Navbar.vue'));
+Vue.component('articles', require('./components/Articles.vue'));
+
+const app = new Vue({
+    el: '#app'
+});
+```
+
+En donde el ID **#app** del componente cargara el template declarado en **`resources/assets/js/components/ExampleComponent.vue`**. Esto es un boilerplate (codigo repetitivo de ejemplo)
+
+Pero usaremos la vista **`resources/assets/views/welcome.blade.php`**
+En donde colocaremos el ID #app y un tag personalizado del componente
+```php
+    <head>
+        ...
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <script>window.Laravel = { csrfToken: '{{ csrf_token() }}' };</script>
+        ...
+        <link href="{{ asset('css/app.css') }}" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+        <div id="app">
+            <navbar></navbar>
+            <div class="container">
+                <articles></articles>
+            </div>
+        </div>
+        <script src="{{ asset('js/app.js') }}"></script>
+    </body>
+```
+
+### Crear componente Articles.vue
+
+Crear **`resources/assets/js/components/Articles.vue`**
+
+```html
+<template>
+    <div>
+        <h2>Articles</h2>
+    </div>
+</template>
+
+<script>
+    export default {
+        data(){
+            return {
+                articles: [],
+                article: {
+                    id: '',
+                    title: '',
+                    body: ''
+                },
+                article_id: ''
+            };
+        }
+    }
+</script>
+```
+
+### Crear componente Navbar.vue
+
+```html
+<template>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-info mb-2">
+        <div class="container">
+            <a href="#" class="navbar-brand">Larticles</a>
+        </div>
+    </nav>
+</template>
+```
