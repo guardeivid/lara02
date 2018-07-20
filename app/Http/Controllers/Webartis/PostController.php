@@ -16,9 +16,9 @@ class PostController extends Controller
 {
     public function index()
     {
-        return $post = Post::join('users', 'posts.id', '=', 'users.id')->orderBy('title', 'desc')->paginate(4);
+        $post = Post::join('users', 'posts.id', '=', 'users.id')->orderBy('title', 'desc')->paginate(4);
 
-        return $users = User::all();
+        //return $users = User::all();
 
 
         return view('post.index', compact('post'));

@@ -28,6 +28,7 @@ Route::put('article', 'ArticleController@store');
 // Delete article
 Route::delete('article/{id}', 'ArticleController@destroy');
 
-Route::resource('/cruds', 'CrudsController', [
+Route::resource('cruds', 'CrudsController', [
   'except' => ['edit', 'show', 'store']
 ]);
+

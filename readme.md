@@ -168,6 +168,7 @@ Route::put('article', 'ArticleController@store');
 Route::delete('article/{id}', 'ArticleController@destroy');
 ```
 
+
 ### Crear Resource, como se va a generar la respuesta
 ```sh
 php artisan make:resource Article
@@ -384,3 +385,16 @@ Crear **`resources/assets/js/components/Articles.vue`**
     </nav>
 </template>
 ```
+
+#### larticles.test/index
+![larticles index](https://user-images.githubusercontent.com/35436943/42975423-6b9b5e1a-8b92-11e8-925f-313e094ff774.jpg)
+
+
+### Otros
+
+#### larticles.test
+![larticles](https://user-images.githubusercontent.com/35436943/42975018-52129046-8b90-11e8-9ab2-e7b3b9a754d3.jpg)
+
+
+#### larticles.test/api/post
+![larticles api articles](https://user-images.githubusercontent.com/35436943/42975766-7bd4a3b6-8b94-11e8-9add-709a6459e8ab.jpg)

@@ -59,6 +59,7 @@ Route::get('/', function () {
     return view('index');
 });
 
+
 Route::group(['middleware' => ['web']], function () {
     Route::resource('post', 'Webartis\PostController');
     Route::POST('addPost', 'Webartis\PostController@addPost');
